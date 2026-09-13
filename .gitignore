@@ -1,0 +1,13 @@
+# 環境変数・機密情報
+.env
+
+# Pythonのキャッシュ
+__pycache__/
+*.pyc
+
+# エディタ設定
+.vscode/
+
+# OS固有の不要ファイル
+.DS_Store
+Thumbs.db
