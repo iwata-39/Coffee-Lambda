@@ -20,7 +20,7 @@ LINE通知は、毎週月曜と木曜のいずれかで新商品が発売され�
   - Terraform
 
 ## インフラ構成図
-![構成図](C:\Users\iwata\OneDrive\ドキュメント\Coffee_Lambda構成図.drawio.svg)
+<img src="./images/architecture.png" width="700">
 
 ## 実装上の工夫
 - サイトごとに関数を分けて、一つのサイトがサーバーダウンしていても他サイトの処理が継続できる形を実現しています。
