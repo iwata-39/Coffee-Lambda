@@ -238,7 +238,7 @@ def line_notify():
             continue
         
         # メッセージに商品情報を追加
-        message_text += f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        message_text += f"━━━━━━━━━━━━━━━\n"
         message_text += f"\n{shop_name}\n\n"
         for product in products:
             message_text += f'- {product["item"]} (¥{product["price"]})\n'
