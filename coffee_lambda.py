@@ -18,7 +18,7 @@ def get_onibus_product():
     try:
         response = requests.get(json_url)
         response.raise_for_status() # requestsのエラー判定
-        data = response.json() # JSON形式のレスポンスをJavascriptで扱う形に変換
+        data = response.json() # JSON形式のレスポンスをPythonの辞書に変換
         for product in data["products"]:  # 各商品を反復処理する
             product_info = {
                 "title": product["title"],
@@ -29,10 +29,10 @@ def get_onibus_product():
             }
             products.append(product_info)
 
-    except requests.RequestException as e: # ネットワーク関連のエラーを表示
-        print(f"Error: {e}")
-    except json.JSONDecodeError: # デコード時のエラーを表示
+    except json.JSONDecodeError:              # デコード時のエラーを表示
         print("Error parsing the JSON response.")
+    except requests.RequestException as e:    # それ以外の通信エラーを表示
+        print(f"Error: {e}")
     return products # 商品情報を返す
 
 def get_rec_product():
@@ -47,7 +47,7 @@ def get_rec_product():
     try:
         response = requests.get(json_url)
         response.raise_for_status() # requestsのエラー判定
-        data = response.json() # JSON形式のレスポンスをJavascriptで扱う形に変換
+        data = response.json() # JSON形式のレスポンスをPythonの辞書に変換
         for product in data["products"]:  # 各商品を反復処理する
             product_info = {
                 "title": product["title"],
@@ -58,10 +58,10 @@ def get_rec_product():
             }
             products.append(product_info)
 
-    except requests.RequestException as e: # ネットワーク関連のエラーを表示
-        print(f"Error: {e}")
-    except json.JSONDecodeError: # デコード時のエラーを表示
+    except json.JSONDecodeError:              # デコード時のエラーを表示
         print("Error parsing the JSON response.")
+    except requests.RequestException as e:    # それ以外の通信エラーを表示
+        print(f"Error: {e}")
     return products # 商品情報を返す
 
 def get_lvs_product():
