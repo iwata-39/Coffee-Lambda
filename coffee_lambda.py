@@ -7,16 +7,16 @@ import os
 
 def get_onibus_product():
     # Onibus Coffeeの商品情報を取得
-    # Shoptifyストアは、/products.jsonエンドポイントを通じて製品データを提供する
+    # Shopifyストアは、/products.jsonエンドポイントを通じて製品データを提供する
     # エンドポイントではproduct_informationの値を返す
 
     url_onibus = 'https://onibuscoffee.com/collections/all'
 
-    # Shoptifyサイトからデータをスクレイピングする
+    # Shopifyサイトからデータをスクレイピングする
     json_url = f"{url_onibus}/products.json"  # ストアのURLに'/products.json'を追加する
     products = []
     try:
-        response = requests.get(json_url)
+        response = requests.get(json_url, timeout=10)
         response.raise_for_status() # requestsのエラー判定
         data = response.json() # JSON形式のレスポンスをPythonの辞書に変換
         for product in data["products"]:  # 各商品を反復処理する
@@ -37,15 +37,15 @@ def get_onibus_product():
 
 def get_rec_product():
     # Rec Coffeeの商品情報を取得
-    # Onibus同様、Shoptifyストアからのスクレイピング
+    # Onibus同様、Shopifyストアからのスクレイピング
     
     url_rec = 'https://rec-coffee.com/collections/all'
 
-    # Shoptifyサイトからデータをスクレイピングする
+    # Shopifyサイトからデータをスクレイピングする
     json_url = f"{url_rec}/products.json"  # ストアのURLに'/products.json'を追加する
     products = []
     try:
-        response = requests.get(json_url)
+        response = requests.get(json_url, timeout=10)
         response.raise_for_status() # requestsのエラー判定
         data = response.json() # JSON形式のレスポンスをPythonの辞書に変換
         for product in data["products"]:  # 各商品を反復処理する
@@ -66,15 +66,15 @@ def get_rec_product():
 
 def get_lvs_product():
     # Leaves Coffeeの商品情報を取得
-    # Leavesは、通常のShoptifyストアではないため、別途実装が必要
+    # Leavesは、通常のShopifyストアではないため、別途実装が必要
     # ソースコードを解析し、商品名と価格を取得する
 
     url_lvs = 'https://leavescoffee.jp/shop/coffee'
-    
-    # Shoptifyサイトからデータをスクレイピングする
+
+    # HTMLからデータをスクレイピングする
     products = []
     try:
-        response = requests.get(url_lvs)
+        response = requests.get(url_lvs, timeout=10)
         response.raise_for_status() # requestsのエラー判定
         soup = BeautifulSoup(response.text, 'html.parser') # ライブラリであるBeautiful Soupを使って、取得したWebページのHTML文字列を解析
         obj = soup.select('div.product-item') # divタグのうち、product-item というクラスを持つすべての要素を取得
@@ -87,17 +87,16 @@ def get_lvs_product():
                     parts = text.split('￥', 1) # 最初に出てくる￥で前後に分割
                     title = parts[0].strip()
                     price = parts[1].replace("New","").strip() # leavesは"New"の文字列が混入する場合があるため除去
-                    product_info = {"title": title,"price": price} # Shoptifyデータと辞書で管理
+                    product_info = {"title": title,"price": price} # Shopifyデータと辞書で管理
                   
                     products.append(product_info)
-            else:
-                # ￥が見つからない場合はそのまま追加
-                products.append({"title": text,"price": ""})
+                else:
+                    # ￥が見つからない場合はそのまま追加
+                    products.append({"title": text,"price": ""})
 
         # もし1件も取れなかった場合
         if not products:
-            products.append({"title": "指定した値が見つかりませんでした"})
-            print("指定した値が見つかりませんでした")
+            print("Leaves: 商品情報を取得できませんでした")
         
     except requests.RequestException as e: # ネットワーク関連のエラーを表示
         print(f"Error: {e}")
@@ -178,19 +177,19 @@ def check_and_update_sheets():
     # 9.スプレッドシートに追加
 
     # スプレッドシートに存在しない商品情報をappend_rowsで一括出力
-    new_oni = [[item["title"], item["id"], item["variants"]] for item in onibus_products if item["title"] not in existing_names_oni]
+    new_oni = [[item["title"], item["id"], item["variants"]] for item in onibus_products if item["title"] in diff_oni]
     if new_oni:
         ws_oni.append_rows(new_oni)
         print("Onibus Coffeeに新商品を追加しました。")
         print(new_oni)
 
-    new_rec = [[item["title"], item["id"], item["variants"]] for item in rec_products if item["title"] not in existing_names_rec]
+    new_rec = [[item["title"], item["id"], item["variants"]] for item in rec_products if item["title"] in diff_rec]
     if new_rec:
         ws_rec.append_rows(new_rec)
         print("Rec Coffeeに新商品を追加しました。")
         print(new_rec)
     
-    new_lvs = [[item["title"], item["price"]] for item in leaves_products if item["title"] not in existing_names_lvs]
+    new_lvs = [[item["title"], item["price"]] for item in leaves_products if item["title"] in diff_lvs]
     if new_lvs:
         ws_lvs.append_rows(new_lvs)
         print("Leaves Coffeeに新商品を追加しました。")
@@ -254,10 +253,9 @@ def line_notify():
             }
         ]
     }
-    print(body)
 
     try:
-        response = requests.post(url, headers=headers, json=body) # LINEにJSON形式でPOSTリクエストを送信
+        response = requests.post(url, headers=headers, json=body, timeout=10) # LINEにJSON形式でPOSTリクエストを送信
         
         if response.status_code != 200:
              print(f"LINE Error Status Code: {response.status_code}")
